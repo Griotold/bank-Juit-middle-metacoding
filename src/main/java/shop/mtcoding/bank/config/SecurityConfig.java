@@ -49,6 +49,13 @@ public class SecurityConfig {
         // 브라우저가 팝업창을 이용해서 사용자 인증을 진행하는 걸 막겠다.
         http.httpBasic().disable();
 
+        // Exception 가로채기
+        http.exceptionHandling().authenticationEntryPoint((request, response, authException) -> {
+//            response.setContentType("application/json; charset=utf-8");
+            response.setStatus(403);
+            response.getWriter().println("error");
+        });
+
         http.authorizeRequests()
                 .antMatchers("/api/s/**").authenticated()
                 .antMatchers("/api/admin/**").hasRole(UserEnum.ADMIN.getValue()) // 최근에는 "ROLE_" 안 붙여도됨
