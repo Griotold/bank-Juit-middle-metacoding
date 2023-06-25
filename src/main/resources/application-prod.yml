@@ -1,8 +1,9 @@
 server:
   port: 5000
-  encoding:
-    charset: utf-8
-    force: true
+  servlet:
+    encoding:
+      charset: utf-8
+      force: true
 
 spring:
   datasource:
