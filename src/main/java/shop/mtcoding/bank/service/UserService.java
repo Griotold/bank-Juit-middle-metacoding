@@ -3,6 +3,7 @@ package shop.mtcoding.bank.service;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,7 @@ public class UserService {
         return new JoinRespDto(userPS);
 
     }
+    @ToString
     @Setter
     @Getter
     static class JoinRespDto{
