@@ -37,12 +37,15 @@ public class CustomValidationAdvice {
             if (arg instanceof BindingResult) {
                 BindingResult bindingResult = (BindingResult) arg;
 
-                Map<String, String> errorMap = new HashMap<>();
+                if (bindingResult.hasErrors()) {
 
-                for (FieldError error : bindingResult.getFieldErrors()) {
-                    errorMap.put(error.getField(), error.getDefaultMessage());
+                    Map<String, String> errorMap = new HashMap<>();
+
+                    for (FieldError error : bindingResult.getFieldErrors()) {
+                        errorMap.put(error.getField(), error.getDefaultMessage());
+                    }
+                    throw new CustomValidationException("유효성 검사 실패", errorMap);
                 }
-                throw new CustomValidationException("유효성 검사 실패", errorMap);
             }
         }
         return proceedingJoinPoint.proceed(); // 정상적으로 joinPoint(타겟 메소드)를 실행해라

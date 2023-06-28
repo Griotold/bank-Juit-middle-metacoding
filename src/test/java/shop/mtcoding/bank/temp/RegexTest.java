@@ -112,13 +112,46 @@ public class RegexTest {
      * password 제약 조건 : 영문, 숫자, 특수기호가 되고, 4~20자
      */
     @Test
-    @DisplayName("username 제약 조건 해보기")
+    @DisplayName("password 제약 조건 해보기")
     void passwordValidation() {
         // given
         String value = "cos4567!!";
 
         // when
         boolean result = Pattern.matches("^[^ㄱ-ㅎㅏ-ㅣ가-힣]{4,20}$", value);
+
+        // then
+        System.out.println("result = " + result);
+        assertThat(result).isTrue();
+    }
+    /**
+     * fullname 제약 조건 : 영문, 한글 1~20자
+     */
+    @Test
+    @DisplayName("fullname 제약 조건 해보기")
+    void user_fullname_Validation() {
+        // given
+        String value = "쌀쌀";
+
+        // when
+        boolean result = Pattern.matches("^[a-zA-Z가-힣]{1,20}$", value);
+
+        // then
+        System.out.println("result = " + result);
+        assertThat(result).isTrue();
+    }
+
+    /**
+     * email 제약 조건 :
+     */
+    @Test
+    @DisplayName("email 제약 조건 해보기")
+    void user_email_Validation() {
+        // given
+        String value = "ssar@nate.com";
+
+        // when
+        boolean result = Pattern.matches("^[a-zA-Z0-9]{2,6}@[a-zA-Z0-9]{2,6}\\.[a-zA-Z0-9]{2,3}$", value);
 
         // then
         System.out.println("result = " + result);
