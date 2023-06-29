@@ -6,13 +6,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import shop.mtcoding.bank.config.jwt.JwtAuthenticationFilter;
 import shop.mtcoding.bank.domain.user.UserEnum;
 import shop.mtcoding.bank.dto.ResponseDto;
 import shop.mtcoding.bank.utils.CustomResponseUtil;
@@ -30,7 +35,14 @@ public class SecurityConfig {
     }
 
     // todo : JWT 필터 등록이 필요함
-
+    public class CustomSecurityFilterManager extends AbstractHttpConfigurer<CustomSecurityFilterManager, HttpSecurity>{
+        @Override
+        public void configure(HttpSecurity builder) throws Exception {
+            AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
+            builder.addFilter(new JwtAuthenticationFilter(authenticationManager));
+            super.configure(builder);
+        }
+    }
     /**
      * JWT 서버를 만들 예정!
      * Session 사용 안함
@@ -52,12 +64,18 @@ public class SecurityConfig {
         // 브라우저가 팝업창을 이용해서 사용자 인증을 진행하는 걸 막겠다.
         http.httpBasic().disable();
 
+        // 필터 적용
+        http.apply(new CustomSecurityFilterManager());
+
         // Exception 가로채기
         http.exceptionHandling().authenticationEntryPoint((request, response, authException) -> {
             String uri = request.getRequestURI();
+            Class<? extends AuthenticationException> authExceptionClass = authException.getClass();
             log.debug("디버그 : {}", uri);
             if (uri.contains("admin")) {
                 CustomResponseUtil.forbidden(response, "권한이 없습니다.");
+            } else if (authExceptionClass == InternalAuthenticationServiceException.class) {
+                CustomResponseUtil.jwtInternal(response, "jwt 로그인이 실패했습니다.");
             } else {
                 CustomResponseUtil.unAuthentication(response, "로그인을 진행해주세요.");
             }
