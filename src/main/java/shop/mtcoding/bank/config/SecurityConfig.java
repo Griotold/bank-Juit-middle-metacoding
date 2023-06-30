@@ -71,12 +71,10 @@ public class SecurityConfig {
         http.apply(new CustomSecurityFilterManager());
 
         // Exception 가로채기
-        // 로그인 안했으면 여기를 타게 된다.
         http.exceptionHandling().authenticationEntryPoint((request, response, authException) -> {
             String uri = request.getRequestURI();
             Class<? extends AuthenticationException> authExceptionClass = authException.getClass();
             log.debug("디버그 : {}", uri);
-
             CustomResponseUtil.fail(response, "로그인을 진행해주세요.", HttpStatus.UNAUTHORIZED);
 
         });
