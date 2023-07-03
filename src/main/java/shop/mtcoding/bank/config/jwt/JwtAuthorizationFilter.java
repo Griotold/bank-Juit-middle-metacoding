@@ -1,5 +1,6 @@
 package shop.mtcoding.bank.config.jwt;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,6 +17,7 @@ import java.io.IOException;
 /**
  * 모든 주소에서 동작함(토큰 검증)
  * */
+@Slf4j
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     public JwtAuthorizationFilter(AuthenticationManager authenticationManager) {
@@ -26,13 +28,17 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         if (isHeaderVerify(request, response)) {
             // 토큰이 존재함
+            log.debug("디버그 : 토큰이 존재함");
+
             String token = request.getHeader(JwtVO.HEADER).replace(JwtVO.TOKEN_PREFIX, "");
             LoginUser loginUser = JwtProcess.verify(token);
+            log.debug("디버그 : 토큰 검증이 완료됨");
 
             // 임시 세션(UserDetails 타입 또는 username)
             Authentication authentication =
                     new UsernamePasswordAuthenticationToken(loginUser, null, loginUser.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.debug("디버그 : 임시 세션이 생성됨");
         }
         chain.doFilter(request, response);
     }

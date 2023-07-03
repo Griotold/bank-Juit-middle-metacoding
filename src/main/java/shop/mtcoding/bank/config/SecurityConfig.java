@@ -71,6 +71,7 @@ public class SecurityConfig {
         http.apply(new CustomSecurityFilterManager());
 
         // Exception 가로채기
+        // 인증 실패
         http.exceptionHandling().authenticationEntryPoint((request, response, authException) -> {
             String uri = request.getRequestURI();
             Class<? extends AuthenticationException> authExceptionClass = authException.getClass();
@@ -86,7 +87,7 @@ public class SecurityConfig {
 
         http.authorizeRequests()
                 .antMatchers("/api/s/**").authenticated()
-                .antMatchers("/api/admin/**").hasRole(UserEnum.ADMIN.getValue()) // 최근에는 "ROLE_" 안 붙여도됨
+                .antMatchers("/api/admin/**").hasRole(UserEnum.ADMIN.name()) // 최근에는 "ROLE_" 안 붙여도됨
                 .anyRequest().permitAll();
 
         return http.build();
