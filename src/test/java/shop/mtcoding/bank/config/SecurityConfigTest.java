@@ -51,6 +51,6 @@ class SecurityConfigTest {
         System.out.println("status = " + status);
 
         // then
-        assertThat(status).isEqualTo(403);
+        assertThat(status).isEqualTo(401);
     }
 }
