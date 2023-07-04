@@ -17,6 +17,7 @@ import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountReqDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto;
+import shop.mtcoding.bank.handler.ex.CustomApiException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,6 +101,23 @@ class AccountServiceTest extends DummyObject {
         assertThat(accountListRespDto.getAccounts().size()).isEqualTo(2L);
         assertThat(accountListRespDto.getAccounts().get(0).getNumber()).isEqualTo(1111L);
         assertThat(accountListRespDto.getAccounts().get(1).getNumber()).isEqualTo(2222L);
+    }
+    @Test
+    @DisplayName("계좌 삭제 서비스 테스트")
+    void deleteAccount_test() {
+        // given
+        long number = 1111L;
+        long userId = 2L;
+
+        // stub 1
+        User ssar = newMockUser(1L, "ssar", "쌀");
+        Account ssarAccount = newMockAccount(1L, 1111L, 1000L, ssar);
+        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(ssarAccount));
+
+        // when
+
+        // then
+        assertThrows(CustomApiException.class, () -> accountService.deleteAccount(number, userId));
 
     }
 
