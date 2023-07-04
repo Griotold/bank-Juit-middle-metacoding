@@ -16,6 +16,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 import shop.mtcoding.bank.config.dummy.DummyObject;
+import shop.mtcoding.bank.domain.account.Account;
+import shop.mtcoding.bank.domain.account.AccountRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountReqDto;
@@ -24,6 +26,7 @@ import java.awt.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static shop.mtcoding.bank.dto.account.AccountReqDto.*;
@@ -43,9 +46,14 @@ class AccountControllerTest extends DummyObject {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AccountRepository accountRepository;
+
     @BeforeEach
     public void setUp() {
         User ssar = userRepository.save(newUser("ssar", "쌀"));
+        Account account1 = accountRepository.save(newAccount(1111L, ssar));
+        Account account2 = accountRepository.save(newAccount(2222L, ssar));
     }
 
     // setBefore = TEST_METHOD : setUp()메소드 수행전에
@@ -74,5 +82,23 @@ class AccountControllerTest extends DummyObject {
 
         // then
         resultActions.andExpect(status().isCreated());
+    }
+    @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    @DisplayName("본인계좌목록보기 컨트롤러 테스트")
+    void findUserAccountListV3_test() throws Exception {
+        // given
+
+        // when
+        ResultActions resultActions
+                = mvc.perform(get("/api/s/account/login-user"));
+        String responseBody = resultActions
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        System.out.println("테스트 = " + responseBody);
+
+        // then
+        resultActions.andExpect(status().isOk());
     }
 }
