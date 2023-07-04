@@ -21,13 +21,14 @@ import shop.mtcoding.bank.domain.account.AccountRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountReqDto;
+import shop.mtcoding.bank.handler.ex.CustomApiException;
 
+import javax.persistence.EntityManager;
 import java.awt.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static shop.mtcoding.bank.dto.account.AccountReqDto.*;
 
@@ -49,11 +50,18 @@ class AccountControllerTest extends DummyObject {
     @Autowired
     private AccountRepository accountRepository;
 
+    @Autowired
+    private EntityManager em;
+
     @BeforeEach
     public void setUp() {
         User ssar = userRepository.save(newUser("ssar", "쌀"));
+        User cos = userRepository.save(newUser("cos", "코스"));
         Account account1 = accountRepository.save(newAccount(1111L, ssar));
         Account account2 = accountRepository.save(newAccount(2222L, ssar));
+        Account cos_account = accountRepository.save(newAccount(3333L, cos));
+
+        em.clear();
     }
 
     // setBefore = TEST_METHOD : setUp()메소드 수행전에
@@ -100,5 +108,31 @@ class AccountControllerTest extends DummyObject {
 
         // then
         resultActions.andExpect(status().isOk());
+    }
+    /**
+     * 테스트시에는 insert 한것들이 전부 PC에 올라간다(영속화)
+     * 영속화된 것을 초기화 해주는 것이 중요
+     * */
+    @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    @DisplayName("계좌 삭제 컨트롤러 테스트")
+    void deleteAccount_test() throws Exception {
+        // given
+        long number = 1111L;
+
+        // when
+        ResultActions resultActions
+                = mvc.perform(delete("/api/s/account/" + number));
+        String responseBody = resultActions
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        System.out.println("테스트 = " + responseBody);
+
+        // then
+        // Junit 테스트에서 delete 쿼리는 DB관련(DML)이므로 가장 마지막에 실행되면 발동 안됨
+        assertThrows(CustomApiException.class, () -> accountRepository.findByNumber(number)
+                .orElseThrow(() -> new CustomApiException("계좌를 찾을 수 없습니다.")));
+
     }
 }

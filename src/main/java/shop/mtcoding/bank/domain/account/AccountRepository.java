@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
-    // todo : 리팩토링해야함
+    // 해결 : Account를 가져올 때 User를 가져오지 않기 떄문에
+    // fetch join으로 리팩토링 불필요
     Optional<Account> findByNumber(Long number);
 
     // select * from account where user.id = :id
