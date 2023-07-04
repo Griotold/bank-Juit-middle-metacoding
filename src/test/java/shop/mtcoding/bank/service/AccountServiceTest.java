@@ -18,6 +18,8 @@ import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountReqDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -69,6 +71,36 @@ class AccountServiceTest extends DummyObject {
 
         // then
         assertThat(accountSaveRespDto.getNumber()).isEqualTo(1111L);
+    }
+    @Test
+    @DisplayName("본인계좌목록 조회 서비스 ")
+    void accountList_test() throws JsonProcessingException {
+        // given
+        Long userId = 1L;
+
+        // stub 1
+        User ssar = newMockUser(userId, "ssar", "쌀");
+        when(userRepository.findById(any())).thenReturn(Optional.of(ssar));
+
+        // stub 2
+        Account account1 = newMockAccount(1L, 1111L, 1000L, ssar);
+        Account account2 = newMockAccount(2L, 2222L, 1000L, ssar);
+        List<Account> accounts = new ArrayList<>();
+        accounts.add(account1);
+        accounts.add(account2);
+        when(accountRepository.findByUser_id(any())).thenReturn(accounts);
+
+        // when
+        AccountListRespDto accountListRespDto = accountService.accountList(userId);
+        String responseBody = om.writeValueAsString(accountListRespDto);
+        System.out.println("테스트 = " + responseBody);
+
+        // then
+        assertThat(accountListRespDto.getFullname()).isEqualTo("쌀");
+        assertThat(accountListRespDto.getAccounts().size()).isEqualTo(2L);
+        assertThat(accountListRespDto.getAccounts().get(0).getNumber()).isEqualTo(1111L);
+        assertThat(accountListRespDto.getAccounts().get(1).getNumber()).isEqualTo(2222L);
+
     }
 
 }
