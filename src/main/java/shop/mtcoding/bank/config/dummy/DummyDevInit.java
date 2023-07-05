@@ -17,8 +17,10 @@ public class DummyDevInit extends DummyObject{
                            AccountRepository accountRepository) {
         return (args) -> {
             User ssar = userRepository.save(newUser("ssar", "쌀"));
-            Account account1 = accountRepository.save(newAccount(1111L, ssar));
-            Account account2 = accountRepository.save(newAccount(2222L, ssar));
+            User cos = userRepository.save(newUser("cos", "코스"));
+            Account ssarAccount1 = accountRepository.save(newAccount(1111L, ssar));
+            Account ssarAccount2 = accountRepository.save(newAccount(2222L, ssar));
+            Account cosAccount1 = accountRepository.save(newAccount(3333L, cos));
         };
     }
 }

@@ -36,7 +36,7 @@ public class AccountReqDto {
     @Setter
     public static class AccountDepositReqDto{
         @NotNull
-        @Digits(integer = 4, fraction = 4)
+        @Digits(integer = 4, fraction = 4, message = "계좌번호는 4자리 입니다.")
         private Long number;
 
         @NotNull
