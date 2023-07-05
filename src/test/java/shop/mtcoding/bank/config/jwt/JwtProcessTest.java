@@ -30,12 +30,17 @@ class JwtProcessTest {
     @DisplayName("토큰 검증")
     void verify_test() {
         // given
-        String jwtToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJiYW5rIiwicm9sZSI6IkNVU1RPTUVSIiwiaWQiOjEsImV4cCI6MTY4ODcyMDczNX0.fwtkqUCbUjvLW2xsMthDzwnmNuaql96Ltv3nEv-hZNvFyxDbPGpTaqeXM6Gj7Ke70F32irvgYAOHu2TKlKnCBQ";
+        User user = User.builder().id(1L).role(UserEnum.CUSTOMER).build();
+        LoginUser loginUser1 = new LoginUser(user);
 
         // when
-        LoginUser loginUser = JwtProcess.verify(jwtToken);
-        Long id = loginUser.getUser().getId();
-        String role = loginUser.getUser().getRole().name();
+        String jwtToken = JwtProcess.create(loginUser1);
+        String replacedToken = jwtToken.replace(JwtVO.TOKEN_PREFIX, "");
+
+        // when
+        LoginUser loginUser2 = JwtProcess.verify(replacedToken);
+        Long id = loginUser2.getUser().getId();
+        String role = loginUser2.getUser().getRole().name();
         System.out.println("id = " + id);
         System.out.println("role = " + role);
 
