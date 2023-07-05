@@ -13,12 +13,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import shop.mtcoding.bank.config.dummy.DummyObject;
 import shop.mtcoding.bank.domain.account.Account;
 import shop.mtcoding.bank.domain.account.AccountRepository;
+import shop.mtcoding.bank.domain.transaction.Transaction;
+import shop.mtcoding.bank.domain.transaction.TransactionEnum;
+import shop.mtcoding.bank.domain.transaction.TransactionRepository;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserRepository;
 import shop.mtcoding.bank.dto.account.AccountReqDto;
 import shop.mtcoding.bank.dto.account.AccountRespDto;
 import shop.mtcoding.bank.handler.ex.CustomApiException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +44,9 @@ class AccountServiceTest extends DummyObject {
 
     @Mock
     private AccountRepository accountRepository;
+
+    @Mock
+    private TransactionRepository transactionRepository;
 
     @Spy
     private ObjectMapper om;
@@ -119,6 +126,46 @@ class AccountServiceTest extends DummyObject {
         // then
         assertThrows(CustomApiException.class, () -> accountService.deleteAccount(number, userId));
 
+    }
+    @Test
+    @DisplayName("계좌 입금 서비스 테스트")
+    void deposit_service_test() {
+        // given
+        AccountDepositReqDto accountDepositReqDto = new AccountDepositReqDto();
+        accountDepositReqDto.setNumber(1111L);
+        accountDepositReqDto.setAmount(10000L);
+        accountDepositReqDto.setGubun("DEPOSIT");
+        accountDepositReqDto.setTel("01034567890");
+
+        // stub 1
+        User ssar = newMockUser(1L, "ssar", "쌀");
+        Account ssarAccount = newMockAccount(1L, 1111L, 1000L, ssar);
+        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(ssarAccount));
+
+        ssarAccount.deposit(accountDepositReqDto.getAmount());
+
+        // stub 2
+        Transaction transaction = Transaction.builder()
+                .depositAccount(ssarAccount)
+                .withdrawAccount(null)
+                .depositAccountBalance(ssarAccount.getBalance())
+                .withdrawAccountBalance(null)
+                .amount(accountDepositReqDto.getAmount())
+                .gubun(TransactionEnum.DEPOSIT)
+                .sender("ATM")
+                .receiver(accountDepositReqDto.getNumber().toString())
+                .tel(accountDepositReqDto.getTel())
+                .createdAt(LocalDateTime.now())
+                .build();
+        when(transactionRepository.save(any())).thenReturn(transaction);
+
+        // when
+        AccountDepositRespDto accountDepositRespDto = accountService.deposit(accountDepositReqDto);
+
+        // then
+        assertThat(accountDepositRespDto.getNumber()).isEqualTo(1111L);
+        assertThat(accountDepositRespDto.getTransaction().getAmount()).isEqualTo(10000L);
+        assertThat(accountDepositRespDto.getTransaction().getDepositAccountBalance()).isEqualTo(11000L);
     }
 
 }
