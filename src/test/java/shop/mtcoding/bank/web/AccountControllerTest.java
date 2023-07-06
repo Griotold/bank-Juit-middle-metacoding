@@ -137,4 +137,29 @@ class AccountControllerTest extends DummyObject {
                 .orElseThrow(() -> new CustomApiException("계좌를 찾을 수 없습니다.")));
 
     }
+    @Test
+    @DisplayName("계좌 입금 컨트롤러 테스트")
+    void deposit_test() throws Exception {
+        // given
+        AccountDepositReqDto accountDepositReqDto = new AccountDepositReqDto();
+        accountDepositReqDto.setNumber(1111L);
+        accountDepositReqDto.setAmount(100L);
+        accountDepositReqDto.setGubun("DEPOSIT");
+        accountDepositReqDto.setTel("01034567890");
+
+        String requestBody = om.writeValueAsString(accountDepositReqDto);
+        System.out.println("requestBody = " + requestBody);
+
+        // when
+        ResultActions resultActions
+                = mvc.perform(post("/api/account/deposit")
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
+
+        // then
+        resultActions.andExpect(status().isCreated());
+    }
 }
