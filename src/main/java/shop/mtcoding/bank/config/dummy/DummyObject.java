@@ -4,12 +4,34 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import shop.mtcoding.bank.domain.account.Account;
+import shop.mtcoding.bank.domain.transaction.Transaction;
+import shop.mtcoding.bank.domain.transaction.TransactionEnum;
 import shop.mtcoding.bank.domain.user.User;
 import shop.mtcoding.bank.domain.user.UserEnum;
 
 import java.time.LocalDateTime;
 
 public class DummyObject {
+
+    // 입금 트랜잭션 -> 계좌 1100원으로 변경 -> 히스토리 생성!
+    protected static Transaction newMockDepositTransaction(Long id, Account account) {
+        account.deposit(100L);
+        Transaction transaction = Transaction.builder()
+                .id(id)
+                .depositAccount(account)
+                .withdrawAccount(null)
+                .depositAccountBalance(account.getBalance())
+                .withdrawAccountBalance(null)
+                .amount(100L)
+                .gubun(TransactionEnum.DEPOSIT)
+                .sender("ATM")
+                .receiver(account.getNumber().toString())
+                .tel("01088887777")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        return transaction;
+    }
 
     protected User newUser(String username, String fullname) {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();

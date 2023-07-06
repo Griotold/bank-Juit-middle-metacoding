@@ -127,45 +127,40 @@ class AccountServiceTest extends DummyObject {
         assertThrows(CustomApiException.class, () -> accountService.deleteAccount(number, userId));
 
     }
+    /**
+     * Account -> balance가 변경 됐는지
+     * Transaction -> balance가 잘 기록되었는지
+     * */
     @Test
     @DisplayName("계좌 입금 서비스 테스트")
     void deposit_service_test() {
         // given
         AccountDepositReqDto accountDepositReqDto = new AccountDepositReqDto();
         accountDepositReqDto.setNumber(1111L);
-        accountDepositReqDto.setAmount(10000L);
+        accountDepositReqDto.setAmount(100L);
         accountDepositReqDto.setGubun("DEPOSIT");
         accountDepositReqDto.setTel("01034567890");
 
-        // stub 1
+        // stub 1 - accountRepository.findByNumber() 동작시 기대값
         User ssar = newMockUser(1L, "ssar", "쌀");
-        Account ssarAccount = newMockAccount(1L, 1111L, 1000L, ssar);
-        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(ssarAccount));
+        Account ssarAccount1 = newMockAccount(1L, 1111L, 1000L, ssar);
+        when(accountRepository.findByNumber(any())).thenReturn(Optional.of(ssarAccount1));
 
-        ssarAccount.deposit(accountDepositReqDto.getAmount());
-
-        // stub 2
-        Transaction transaction = Transaction.builder()
-                .depositAccount(ssarAccount)
-                .withdrawAccount(null)
-                .depositAccountBalance(ssarAccount.getBalance())
-                .withdrawAccountBalance(null)
-                .amount(accountDepositReqDto.getAmount())
-                .gubun(TransactionEnum.DEPOSIT)
-                .sender("ATM")
-                .receiver(accountDepositReqDto.getNumber().toString())
-                .tel(accountDepositReqDto.getTel())
-                .createdAt(LocalDateTime.now())
-                .build();
+        // stub 2 - transactionRepository.save() 호출시 기댓값
+        Account ssarAccount2 = newMockAccount(1L, 1111L, 1000L, ssar);
+        Transaction transaction = newMockDepositTransaction(1L, ssarAccount2);
         when(transactionRepository.save(any())).thenReturn(transaction);
 
         // when
         AccountDepositRespDto accountDepositRespDto = accountService.deposit(accountDepositReqDto);
+        System.out.println("트랜잭션 입금 계좌 잔액 = " + accountDepositRespDto.getTransaction().getDepositAccountBalance());
+        System.out.println("계좌쪽 잔액 = " + ssarAccount1.getBalance());
 
         // then
         assertThat(accountDepositRespDto.getNumber()).isEqualTo(1111L);
-        assertThat(accountDepositRespDto.getTransaction().getAmount()).isEqualTo(10000L);
-        assertThat(accountDepositRespDto.getTransaction().getDepositAccountBalance()).isEqualTo(11000L);
+        assertThat(accountDepositRespDto.getTransaction().getAmount()).isEqualTo(100L);
+        assertThat(ssarAccount1.getBalance()).isEqualTo(1100L);
+        assertThat(accountDepositRespDto.getTransaction().getDepositAccountBalance()).isEqualTo(1100L);
     }
 
 }
