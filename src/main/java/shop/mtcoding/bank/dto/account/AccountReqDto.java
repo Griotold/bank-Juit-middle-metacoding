@@ -51,5 +51,21 @@ public class AccountReqDto {
         private String tel;
     }
 
+    @Getter
+    @Setter
+    public static class AccountWithdrawReqDto{
+        @NotNull
+        @Digits(integer = 4, fraction = 4)
+        private Long number;
+        @NotNull
+        @Digits(integer = 4, fraction = 4)
+        private Long password;
+        @NotNull
+        private Long amount;
+        @NotEmpty
+        @Pattern(regexp = "WITHDRAW")
+        private String gubun;
+    }
+
 
 }

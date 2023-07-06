@@ -91,4 +91,40 @@ public class AccountRespDto {
             }
         }
     }
+    // DTO가 똑같아도 무조건 새로 만들어주기
+    @Getter
+    @Setter
+    public static class AccountWithdrawRespDto{
+        private Long id; // 계좌 ID
+        private Long number; // 계좌 번호
+        private Long balance;
+        private TransactionDto transaction;
+
+        public AccountWithdrawRespDto(Account account, Transaction transaction) {
+            this.id = account.getId();
+            this.number = account.getNumber();
+            this.balance = account.getBalance();
+            this.transaction = new TransactionDto(transaction);
+        }
+
+        @Getter
+        @Setter
+        public static class TransactionDto {
+            private Long id;
+            private String gubun;
+            private String sender;
+            private String receiver;
+            private Long amount;
+            private String createdAt;
+
+            public TransactionDto(Transaction transaction) {
+                this.id = transaction.getId();
+                this.gubun = transaction.getGubun().getValue();
+                this.sender = transaction.getSender();
+                this.receiver = transaction.getReceiver();
+                this.amount = transaction.getAmount();
+                this.createdAt = CustomDateUtil.toStringFormat(transaction.getCreatedAt());
+            }
+        }
+    }
 }
