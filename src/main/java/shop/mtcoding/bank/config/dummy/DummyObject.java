@@ -4,6 +4,7 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import shop.mtcoding.bank.domain.account.Account;
+import shop.mtcoding.bank.domain.account.AccountRepository;
 import shop.mtcoding.bank.domain.transaction.Transaction;
 import shop.mtcoding.bank.domain.transaction.TransactionEnum;
 import shop.mtcoding.bank.domain.user.User;
@@ -12,6 +13,66 @@ import shop.mtcoding.bank.domain.user.UserEnum;
 import java.time.LocalDateTime;
 
 public class DummyObject {
+    protected Transaction newTransferTransaction(Account withdrawAccount,
+                                                 Account depositAccount, AccountRepository accountRepository) {
+        withdrawAccount.withdraw(100L);
+        depositAccount.deposit(100L);
+        // 더티 체킹이 안되기 때문에
+        if (accountRepository != null) {
+            accountRepository.save(withdrawAccount);
+            accountRepository.save(depositAccount);
+        }
+        Transaction transaction = Transaction.builder()
+                .withdrawAccount(withdrawAccount)
+                .depositAccount(depositAccount)
+                .withdrawAccountBalance(withdrawAccount.getBalance())
+                .depositAccountBalance(depositAccount.getBalance())
+                .amount(100L)
+                .gubun(TransactionEnum.TRANSFER)
+                .sender(withdrawAccount.getNumber().toString())
+                .receiver(depositAccount.getNumber().toString())
+                .build();
+        return transaction;
+    }
+
+    protected Transaction newWithdrawTransaction(Account account, AccountRepository accountRepository) {
+        account.withdraw(100L);
+        // 더티 체킹이 안되기 때문에
+        if (accountRepository != null) {
+            accountRepository.save(account);
+        }
+        Transaction transaction = Transaction.builder()
+                .withdrawAccount(account)
+                .depositAccount(null)
+                .withdrawAccountBalance(account.getBalance())
+                .depositAccountBalance(null)
+                .amount(100L)
+                .gubun(TransactionEnum.WITHDRAW)
+                .sender(account.getNumber().toString())
+                .receiver("ATM")
+                .build();
+        return transaction;
+    }
+
+    protected Transaction newDepositTransaction(Account account, AccountRepository accountRepository) {
+        account.deposit(100L);
+        // 더티 체킹이 안되기 때문에
+        if (accountRepository != null) {
+            accountRepository.save(account);
+        }
+        Transaction transaction = Transaction.builder()
+                .withdrawAccount(null)
+                .depositAccount(account)
+                .withdrawAccountBalance(null)
+                .depositAccountBalance(account.getBalance())
+                .amount(100L)
+                .gubun(TransactionEnum.DEPOSIT)
+                .sender("ATM")
+                .receiver(account.getNumber().toString())
+                .tel("01022227777")
+                .build();
+        return transaction;
+    }
 
     // 입금 트랜잭션 -> 계좌 1100원으로 변경 -> 히스토리 생성!
     protected static Transaction newMockDepositTransaction(Long id, Account account) {
