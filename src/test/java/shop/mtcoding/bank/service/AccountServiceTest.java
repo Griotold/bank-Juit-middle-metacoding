@@ -179,4 +179,37 @@ class AccountServiceTest extends DummyObject {
         // then
         assertThat(account.getBalance()).isEqualTo(1100L);
     }
+    @Test
+    @DisplayName("계좌 출금 서비스 테스트 ")
+    void withdraw_test() {
+        // given
+        Long amount = 100L;
+        Long password = 1234L;
+        Long userId = 1L;
+
+        User ssar = newMockUser(1L, "ssar", "쌀");
+        Account ssarAccount = newMockAccount(1L, 1111L, 1000L, ssar);
+
+        // when
+        // 0원 체크
+        if (amount <= 0L) {
+            throw new CustomApiException("0원 이하의 금액을 입금할 수 없습니다.");
+        }
+
+        // 출금 소유자 확인
+        ssarAccount.checkOwner(userId);
+
+        //계좌 비밀번호 테스트
+        ssarAccount.checkSamePassword(password);
+
+        // 계좌 잔액 체크
+//        ssarAccount.checkBalance(amount);
+
+        // 출금 확인
+        ssarAccount.withdraw(amount);
+
+        // then
+        assertThat(ssarAccount.getBalance()).isEqualTo(900L);
+
+    }
 }
