@@ -16,11 +16,11 @@ public class TransactionRespDto {
     @Getter
     @Setter
     public static class TransactionListRespDto{
-        private List<TransactionDto> transacions = new ArrayList<>();
+        private List<TransactionDto> transactions = new ArrayList<>();
 
-        public TransactionListRespDto(Account account, List<Transaction> transacions) {
-            this.transacions
-                    = transacions
+        public TransactionListRespDto(Account account, List<Transaction> transactions) {
+            this.transactions
+                    = transactions
                     .stream()
                     .map((transaction) -> new TransactionDto(transaction, account.getNumber()))
                     .collect(Collectors.toList());
