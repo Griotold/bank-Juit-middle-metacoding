@@ -65,6 +65,25 @@ class TransactionRepositoryImplTest extends DummyObject {
             System.out.println("=====================");
         });
     }
+    @Test
+    @DisplayName("'ALL'을 줬을 때 findTransactionList 테스트")
+    void findTransaction_all_test() {
+        // given
+        Long accountId = 1L;
+
+        // when
+        List<Transaction> all = transactionRepository.findTransactionList(accountId, "ALL", 0);
+        all.forEach((t) -> {
+            System.out.println("t.getId() = " + t.getId());
+            System.out.println("t.getAmount() = " + t.getAmount());
+            System.out.println("t.getSender() = " + t.getSender());
+            System.out.println("t.getReceiver() = " + t.getReceiver());
+            System.out.println("t.getGubun() = " + t.getGubun());
+            System.out.println("t.getWithdrawAccountBalance() = " + t.getWithdrawAccountBalance());
+            System.out.println("t.getDepositAccountBalance() = " + t.getDepositAccountBalance());
+            System.out.println("=============");
+        });
+    }
     private void dataSetting() {
         User ssar = userRepository.save(newUser("ssar", "쌀"));
         User cos = userRepository.save(newUser("cos", "코스,"));
