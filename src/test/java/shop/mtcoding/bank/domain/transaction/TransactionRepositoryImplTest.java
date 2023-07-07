@@ -1,5 +1,6 @@
 package shop.mtcoding.bank.domain.transaction;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import shop.mtcoding.bank.domain.user.UserRepository;
 import javax.persistence.EntityManager;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @DataJpaTest // DB 관련된 Bean이 다 올라온다.
@@ -36,6 +38,7 @@ class TransactionRepositoryImplTest extends DummyObject {
     public void setUp() {
         autoincrementReset();
         dataSetting();
+        em.clear(); // repository 테스트에서는 필수!
     }
 
     @Test
@@ -124,9 +127,34 @@ class TransactionRepositoryImplTest extends DummyObject {
             System.out.println("=============");
         });
     }
+
+    @Test
+    @DisplayName("fetch join 테스트")
+    void fetch_join_test() {
+        // given
+        Long accountId = 2L;
+
+        // when
+        List<Transaction> all = transactionRepository.findTransactionList(accountId, "WITHDRAW", 0);
+        all.forEach((t) -> {
+            System.out.println("t.getId() = " + t.getId());
+            System.out.println("t.getAmount() = " + t.getAmount());
+            System.out.println("t.getSender() = " + t.getSender());
+            System.out.println("t.getReceiver() = " + t.getReceiver());
+            System.out.println("t.getGubun() = " + t.getGubun());
+            System.out.println("t.getWithdrawAccount().getBalance() = " + t.getWithdrawAccount().getBalance());
+            System.out.println("출금 계좌의 fullname = " + t.getWithdrawAccount().getUser().getFullname());
+            System.out.println("t.getWithdrawAccountBalance() = " + t.getWithdrawAccountBalance());
+            System.out.println("t.getDepositAccountBalance() = " + t.getDepositAccountBalance());
+            System.out.println("=============");
+        });
+
+        // then
+        assertThat(all.get(0).getWithdrawAccountBalance()).isEqualTo(1100L);
+    }
     private void dataSetting() {
         User ssar = userRepository.save(newUser("ssar", "쌀"));
-        User cos = userRepository.save(newUser("cos", "코스,"));
+        User cos = userRepository.save(newUser("cos", "코스"));
         User love = userRepository.save(newUser("love", "러브"));
         User admin = userRepository.save(newUser("admin", "관리자"));
 
