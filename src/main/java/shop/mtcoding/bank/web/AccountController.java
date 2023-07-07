@@ -40,7 +40,7 @@ public class AccountController {
      * V1 : userId를 쿼리파라미터로 받는 경우
      * userId와 로그인된 유저의 id가 일치하는지 검증이 필요하다.
      * */
-    @GetMapping("/s/account/{userId}")
+//    @GetMapping("/s/account/{userId}")
     public ResponseEntity<?> findUserAccountListV1(@PathVariable Long userId,
                                                    @AuthenticationPrincipal LoginUser loginUser) {
         if (userId != loginUser.getUser().getId()) {
@@ -97,6 +97,16 @@ public class AccountController {
                                       @AuthenticationPrincipal LoginUser loginUser) {
         AccountTransferRespDto accountTransferRespDto = accountService.transfer(accountTransferReqDto, loginUser.getUser().getId());
         return new ResponseEntity<>(new ResponseDto<>(1, "계좌 이체 완료", accountTransferRespDto),
+                HttpStatus.OK);
+    }
+
+    @GetMapping("/s/account/{number}")
+    public ResponseEntity<?> accountDetail(@PathVariable Long number,
+                                           @RequestParam(value = "page", defaultValue = "0") Integer page,
+                                           @AuthenticationPrincipal LoginUser loginUser) {
+        AccountDetailRespDto accountDetailRespDto
+                = accountService.accountDetail(number, loginUser.getUser().getId(), page);
+        return new ResponseEntity<>(new ResponseDto<>(1, "계좌 상세보기 성공", accountDetailRespDto),
                 HttpStatus.OK);
     }
 }
