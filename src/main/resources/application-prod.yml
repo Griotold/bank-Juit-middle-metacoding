@@ -7,10 +7,10 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mariadb://${rds.hostname}:${rds.port}/${rds.db.name}
-    driver-class-name: org.mariadb.jdbc.Driver
-    username: ${rds.username}
-    password: ${rds.password}
+    url: jdbc:mysql://database:3306/bank
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: password
 
   jpa:
     open-in-view: false

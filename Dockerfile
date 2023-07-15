@@ -4,7 +4,7 @@ MAINTAINER "Griotold"
 
 COPY /build/libs/*.jar /app.jar
 
-EXPOSE 8081
+EXPOSE 5000
 
-CMD ["java", "-jar", "/app.jar"]
-# CMD ["java", "-Dspring.profiles.active=원하는 프로파일", "-jar", "app.jar"]
+# CMD ["java", "-jar", "/app.jar"]
+CMD ["java", "-Dspring.profiles.active=prod", "-jar", "app.jar"]
