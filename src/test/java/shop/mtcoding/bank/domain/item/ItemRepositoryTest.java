@@ -1,5 +1,8 @@
 package shop.mtcoding.bank.domain.item;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -7,9 +10,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,6 +31,9 @@ class ItemRepositoryTest {
 
     @Autowired
     ItemRepository itemRepository;
+
+    @PersistenceContext
+    EntityManager em;
 
     void createItemList() {
         for (int i = 1; i <= 10; i++) {
@@ -174,5 +186,59 @@ class ItemRepositoryTest {
         }
         // then
         assertThat(itemList.size()).isEqualTo(10);
+    }
+
+    @Test
+    @DisplayName("querydsl : 조건절 2개 + 정렬 1개")
+    void queryDsl_test() {
+        // given
+        createItemList();
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QItem qItem = QItem.item;
+        JPAQuery<Item> query = queryFactory.selectFrom(qItem)
+                .where(qItem.itemSellStatus.eq(ItemSellStatus.SELL))
+                .where(qItem.itemDetail.like("%" + "테스트 상품 상세 설명" + "%"))
+                .orderBy(qItem.price.desc());
+        List<Item> itemList = query.fetch();
+        for (Item item : itemList) {
+            System.out.println("item = " + item);
+        }
+        // when
+        // then
+        assertThat(itemList.get(0).getItemName()).isEqualTo("테스트 상품10");
+    }
+
+    @Test
+    @DisplayName("querydsl : 동적쿼리 + 페이징")
+    void querydsl_test2() {
+        // given
+        createItemList2();
+
+        // when
+        BooleanBuilder booleanBuilder = new BooleanBuilder();
+        QItem qItem = QItem.item;
+        String itemDetail = "테스트 상품 상세 설명";
+        int price = 10003;
+        String itemSellStatus = "SELL";
+
+        booleanBuilder.and(qItem.itemDetail.like("%" + itemDetail + "%"));
+        booleanBuilder.and(qItem.price.gt(price));
+
+        if (ItemSellStatus.SELL.equals(ItemSellStatus.valueOf(itemSellStatus))) {
+            booleanBuilder.and(qItem.itemSellStatus.eq(ItemSellStatus.SELL));
+        }
+
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Item> itemPagingResult = itemRepository.findAll(booleanBuilder, pageable);
+        System.out.println("Total elements = " + itemPagingResult.getTotalElements());
+
+        List<Item> resultItemList = itemPagingResult.getContent();
+        for (Item item : resultItemList) {
+            System.out.println("item = " + item);
+        }
+
+        // then
+        assertThat(resultItemList.size()).isEqualTo(2);
+        assertThat(resultItemList.get(0).getItemName()).isEqualTo("테스트 상품4");
     }
 }
